@@ -1,5 +1,7 @@
 // 包含OpenCV库的头文件，这是进行图像处理的基础库
 #include <opencv2/opencv.hpp>
+#include <algorithm>
+#include <cctype>
 
 // 包含自定义的YOLOv5模型的头文件，用于物体检测
 #include "task/yolov5.h"
@@ -54,13 +56,30 @@ void get_results(int width = 1280, int height = 720, int fps = 30)
     NN_LOG_INFO("Get results end.");  // 输出结束日志
 }
 
-// 函数：读取视频流并将帧提交给线程池进行处理
-void read_stream(const char *video_file)
+// 函数：读取视频流或摄像头并将帧提交给线程池进行处理
+void read_stream(const std::string &video_source)
 {
-    cv::VideoCapture cap(video_file);  // 打开视频文件
+    cv::VideoCapture cap;
+    bool open_ok = false;
+
+    // 如果输入仅包含数字，则尝试按摄像头索引打开
+    if (!video_source.empty() && std::all_of(video_source.begin(), video_source.end(), ::isdigit))
+    {
+        int cam_id = std::stoi(video_source);
+        cap.open(cam_id);
+        open_ok = cap.isOpened();
+    }
+
+    // 否则按文件路径打开
+    if (!open_ok)
+    {
+        cap.open(video_source);
+    }
+
     if (!cap.isOpened())
     {
-        NN_LOG_ERROR("Failed to open video file: %s", video_file);  // 如果视频打不开，记录错误日志
+        NN_LOG_ERROR("Failed to open video source: %s", video_source.c_str());  // 如果无法打开，记录错误日志
+        return;
     }
 
     // 获取视频的宽度、高度和帧率
@@ -89,9 +108,9 @@ void read_stream(const char *video_file)
 // 主函数
 int main(int argc, char **argv)
 {
-    // 从命令行参数获取模型文件路径和视频文件路径
+    // 从命令行参数获取模型文件路径和视频源（文件或摄像头索引）
     std::string model_file = argv[1];  // 模型文件路径
-    const char *video_file = argv[2];  // 视频文件路径
+    std::string video_source = argv[2];  // 视频文件路径或摄像头索引
     const int num_threads = (argc > 3) ? atoi(argv[3]) : 12;  // 获取线程数，如果未指定，默认为12
 
     // 创建线程池实例并设置线程池
@@ -99,7 +118,7 @@ int main(int argc, char **argv)
     g_pool->setUp(model_file, num_threads);
 
     // 创建并启动读取视频流的线程
-    std::thread read_stream_thread(read_stream, video_file);
+    std::thread read_stream_thread(read_stream, video_source);
     // 创建并启动获取处理结果的线程
     std::thread result_thread(get_results, 1280, 720, 25);
 

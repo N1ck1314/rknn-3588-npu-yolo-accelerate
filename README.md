@@ -45,6 +45,11 @@
    cd ..
    ./yolov5_thread_pool 模型 视频源 线程数
    ```
+   其中 **视频源** 可以是视频文件路径，也可以是摄像头索引（如 `0` 表示默认摄像头）。
+   例如使用摄像头：
+   ```bash
+   ./yolov5_thread_pool ./weights/yolov5s.rknn 0 4
+   ```
    或者运行sh脚本
    ```bash
    ./yolorun.sh

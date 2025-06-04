@@ -48,6 +48,11 @@ This project uses the official model and converts it using the following tools:
    ```bash
    ./yolov5_thread_pool model video_source num_threads
    ```
+   `video_source` can be either a video file path or a camera index (e.g. `0` for the default camera).
+   Example using a camera:
+   ```bash
+   ./yolov5_thread_pool ./weights/yolov5s.rknn 0 4
+   ```
    Or run the shell script:
    ```bash
    ./yolorun.sh
