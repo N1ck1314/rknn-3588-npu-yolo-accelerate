@@ -5,7 +5,9 @@ MODEL_FILE1="./weights/yolov5s.rknn"
 VIDEO_FILE1="./720p60hz.mp4"
 
 # 启动程序处理一个视频，默认程序开启4个线程
-./build/yolov5_thread_pool $MODEL_FILE1 $VIDEO_FILE1 4 
+./build/yolov5_thread_pool $MODEL_FILE1 $VIDEO_FILE1 4
+# 示例：使用默认摄像头进行检测
+# ./build/yolov5_thread_pool $MODEL_FILE1 0 4
 # 等待所有程序执行完毕
 wait
 
